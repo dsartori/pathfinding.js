@@ -235,15 +235,16 @@ s.debug = 0;
 var g = new Grid();
 g.show();
 
-print ("Depth-First Search: [0,0] to [13,11]");
-showMoves (s.depthFirstSearch(g,[0,0],[4,4],0));
+
+print ("Depth-First Search: ");
+showMoves (s.depthFirstSearch(g,[0,0],[4,4]));
 print (s.count + " steps");
 
 
 s.count = 0;
 s.predecessor = {};
 g.clearVisited();
-print ("Breadth-First Search: [0,0] to [13,11]");
+print ("Breadth-First Search: ");
 showMoves (s.breadthFirstSearch(g,[0,0],[4,4]));
 print (s.count + " steps");
 
