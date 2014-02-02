@@ -198,9 +198,8 @@ function Search(){
  			var moves = matrix.possibleMoves(currentPosition);
  			for (i = 0; i < moves.length; i++){
  				if (!contains(queue,moves[i])){
- 					var x = moves[i][0];
-					var y = moves[i][1];
-					this.predecessor[x+","+y] = currentPosition;
+
+					this.predecessor[makeKey(moves[i])] = currentPosition;
 					queue.push(moves[i]);
 				}
 			}
@@ -220,7 +219,7 @@ function Search(){
 			var y = move[1];
 
 			// cost to get here
- 			g = depth[x+","+y];
+ 			g = depth[makeKey(move)];
 
  			// heuristic
  			deltaX = Math.abs(x - goalX);
@@ -237,12 +236,10 @@ function Search(){
  			var bestIndex = 0;
 
  			for (var i = 0;i<moves.length;i++){
- 				var x = moves[i][0];
- 				var y = moves[i][1];
 
- 				if (score[x+","+y] > bestScore){
+ 				if (score[makeKey(moves[i])] > bestScore){
  					bestIndex = i;
- 					bestScore = score[x+","+y];
+ 					bestScore = score[makeKey(moves[i])];
  				}
  			}
  			return bestIndex;
@@ -257,12 +254,9 @@ function Search(){
  		// initialize data structures
  		open[0]=position;
  		closed[0]=position;
- 		var x = position[0];
-		var y = position[1];
- 		depth[x+","+y] = 0;
+ 		depth[makeKey(position)] = 0;
 
  		while (open.length > 0){
-
 
  			this.count++;
  			var bestIndex = getBest(open);
@@ -274,24 +268,19 @@ function Search(){
  				closed.push(currentPosition);
 
  			}
-			var x = currentPosition[0];
-			var y = currentPosition[1];
 			var currentScore = calculateScore(currentPosition,goal);
 
-			if(score[x+","+y]){
-				if(currentScore < score[x+","+y]){
-					score[x+","+y] = currentScore;
+			if(score[makeKey(currentPosition)]){
+				if(currentScore < score[makeKey(currentPosition)]){
+					score[makeKey(currentPosition)] = currentScore;
 				}
 			}else{
-				score[x+","+y] = currentScore;
+				score[makeKey(currentPosition)] = currentScore;
 			}
 			
  			if (currentPosition[0] == goal[0] && currentPosition[1] == goal[1]){
  				return this.pathFrom(goal);
  			}
-
- 			//matrix.visit(currentPosition);
-
  	
  			if (this.debug){
  				print ("");
@@ -303,42 +292,32 @@ function Search(){
  			for (var i = 0; i < moves.length; i++){
 
  					this.count++;
-					var x = currentPosition[0];
-					var y = currentPosition[1];
- 					var d = depth[x+","+y];	
+ 					var d = depth[makeKey(currentPosition)];	
 
  					x = moves[i][0];
  					y = moves[i][1];
  					depth[x+","+y] = d+1;
 
  				if(contains(closed,moves[i])){
- 					var x = moves[i][0];
- 					var y = moves[i][1];
- 					var prior = score[x+","+y];
+ 					var prior = score[makeKey(moves[i])];
 					var currentScore = calculateScore(moves[i],goal);
  					if  (currentScore > prior){
- 						score[x+","+y] = currentScore;
+ 						score[makeKey(moves[i])] = currentScore;
  						closed.splice(closed.indexOf(moves[i]));
  						if (!contains(open,moves[i])){
- 							var x = moves[i][0];
-							var y = moves[i][1];
-							this.predecessor[x+","+y] = currentPosition;
+							this.predecessor[makeKey(moves[i])] = currentPosition;
 							open.push(moves[i]);
 						};
  					}
  				}else{
 
  					if (!contains(open,moves[i])){
- 						var x = moves[i][0];
-						var y = moves[i][1];
-						this.predecessor[x+","+y] = currentPosition;
-						score[x+","+y] = calculateScore(moves[i],goal);
+						this.predecessor[makeKey(moves[i])] = currentPosition;
+						score[makeKey(moves[i])] = calculateScore(moves[i],goal);
 
 						open.push(moves[i]);
 					}
 				}
-
-				//showMoves(open);
 
 			}
  		}
