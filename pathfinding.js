@@ -125,9 +125,11 @@ function Search(){
 
 	this.predecessor = {};
 	this.debug = 0;
+	this.count =0;
 
 	this.depthFirstSearch = function(matrix,position,goal){
 
+		this.count++;
 		matrix.visit(position);
 
 		if (position[0] == goal[0] && position[1]==goal[1]){
@@ -154,12 +156,13 @@ function Search(){
 	}
  	this.breadthFirstSearch = function(matrix,position,goal){
 
-
+ 		
  		var queue = [[]];
  		queue[0]=position;
  		print (position);
 
  		while (queue.length > 0){
+ 			this.count++;
  			var currentPosition = queue[0];
  			queue.shift();
 
@@ -216,8 +219,10 @@ s.debug = 1;
 
 var g = new Grid();
 showMoves (s.depthFirstSearch(g,[0,0],[4,4]));
+print (s.count + " moves");
 
+s.count = 0;
 g.clearVisited();
 showMoves (s.breadthFirstSearch(g,[0,0],[4,4]));
-
+print (s.count + " moves");
 
