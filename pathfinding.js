@@ -1,23 +1,28 @@
 function Grid(){
-	
-	if (arguments[0])
-		this.xSize = arguments[0];
-	else
-		this.xSize = 5;
 
-	if (arguments[1])
-		this.ySize = arguments[1];
-	else
-		this.ySize = 5;
-
-	if (arguments[2])
-		this.matrix = arguments[2];
-	else
-		this.matrix = 	[['0','0','0','0','0'],
-						['0','0','1','0','1'],
-						['1','0','1','0','1'],
-						['0','0','1','0','0'],
-						['0','0','1','0','0']];
+this.matrix = [['0','1','0','0','0'],
+				['0','1','0','0','0'],
+				['0','1','0','1','0'],
+				['0','0','0','1','0'],
+				['0','0','0','1','0']];
+/*
+this.matrix = [	['0','0','1','0','0','1','0','0','0','0','0','0','0','0'],
+				['0','0','1','0','0','0','0','0','1','1','1','1','1','1'],
+				['0','0','0','0','1','0','1','0','0','0','0','0','0','0'],
+				['1','1','1','0','1','0','1','0','1','1','1','1','1','0'],
+				['0','0','0','0','1','0','1','0','0','0','0','0','1','0'],
+				['0','0','0','0','1','0','1','1','1','1','0','0','1','1'],
+				['0','1','1','1','1','0','1','0','0','0','1','0','1','0'],
+				['0','0','0','0','1','1','1','0','0','0','1','0','1','0'],
+				['0','0','0','0','1','1','1','1','1','0','1','0','0','0'],	
+				['0','0','0','0','0','0','0','0','1','0','1','1','1','0'],
+				['0','0','0','0','0','0','0','0','1','0','0','0','1','0'],
+				['0','0','0','0','0','0','0','0','1','0','0','0','0','0'],
+				['0','0','0','0','0','0','0','0','1','0','0','0','0','0'],
+				['0','0','0','0','0','0','0','0','1','0','0','0','0','0']];
+*/
+    this.xSize = this.matrix[0].length;
+    this.ySize = this.matrix.length;
 
 
 	this.visited = copy(this.matrix);
@@ -76,7 +81,7 @@ function Grid(){
 
 // utility functions
 function showMoves(arr){
-var str = '';
+var str = arr.length + ' moves:';
 	for (var i = 0; i < arr.length ; i++){
 		if (i > 0){ 
 			str += ',';
@@ -136,43 +141,48 @@ function Search(){
 			return this.pathFrom(goal);
 		}
 
-		var m = matrix.possibleMoves(position);
+		var moves = matrix.possibleMoves(position);
 
 		if (this.debug)
 			matrix.show();
 
-		for (var i = 0; i < m.length ; i++){
+		for (var i = 0; i < moves.length ; i++){
 
 					if (this.debug)
-						print ("move = " + m[i]);
+						print ("move = " + moves[i]);
 
-					var x = m[i][0];
-					var y = m[i][1];
+					var x = moves[i][0];
+					var y = moves[i][1];
 					this.predecessor[x+","+y] = position;
 					newMatrix = clone(matrix);
-					return this.depthFirstSearch(newMatrix,m[i],goal);
+					if (this.depthFirstSearch(newMatrix,moves[i],goal)){
+						return this.pathFrom(goal);
+					}
 
 		}
+
 	}
  	this.breadthFirstSearch = function(matrix,position,goal){
 
  		
  		var queue = [[]];
  		queue[0]=position;
- 		print (position);
 
  		while (queue.length > 0){
  			this.count++;
  			var currentPosition = queue[0];
  			queue.shift();
 
-					if (this.debug)
+					if (this.debug){
 						print ("move = " + currentPosition);
-
+					 	var x = currentPosition[0];
+						var y = currentPosition[1];
+						print ("predecessor = " + this.predecessor[x+","+y]);
+					}
+			
  			if (currentPosition[0] == goal[0] && currentPosition[1] == goal[1]){
  				return this.pathFrom(goal);
  			}
-
  			matrix.visit(currentPosition);
 
  			if (this.debug)
@@ -181,6 +191,9 @@ function Search(){
  			var moves = matrix.possibleMoves(currentPosition);
  			for (i = 0; i < moves.length; i++){
  				if (!contains(queue,moves[i])){
+ 					var x = moves[i][0];
+					var y = moves[i][1];
+					this.predecessor[x+","+y] = currentPosition;
 					queue.push(moves[i]);
 				}
 			}
@@ -214,15 +227,23 @@ function Search(){
 
 
 
+// Demo 
 var s = new Search();
-s.debug = 1;
+s.debug = 0;
+
 
 var g = new Grid();
-showMoves (s.depthFirstSearch(g,[0,0],[4,4]));
-print (s.count + " moves");
+g.show();
+
+print ("Depth-First Search: [0,0] to [13,11]");
+showMoves (s.depthFirstSearch(g,[0,0],[4,4],0));
+print (s.count + " steps");
+
 
 s.count = 0;
+s.predecessor = {};
 g.clearVisited();
+print ("Breadth-First Search: [0,0] to [13,11]");
 showMoves (s.breadthFirstSearch(g,[0,0],[4,4]));
-print (s.count + " moves");
+print (s.count + " steps");
 
