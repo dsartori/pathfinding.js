@@ -1,12 +1,6 @@
 function Grid(){
 
-/*
-this.matrix = [['0','1','0','0','0'],
-				['0','1','0','0','0'],
-				['0','1','0','1','0'],
-				['0','0','0','1','0'],
-				['0','0','0','1','0']];
-*/
+
 this.matrix = [	['0','0','1','0','0','1','0','0','0','0','0','0','0','0'],
 				['0','0','1','0','0','0','0','0','1','1','1','1','1','1'],
 				['0','0','0','0','1','0','1','0','0','0','0','0','0','0'],
@@ -25,9 +19,11 @@ this.matrix = [	['0','0','1','0','0','1','0','0','0','0','0','0','0','0'],
     this.xSize = this.matrix[0].length;
     this.ySize = this.matrix.length;
 
-
+    // visited matrix marks visited nodes
 	this.visited = copy(this.matrix);
 
+
+	// print the matrix
 	this.show = function(){
 
 		for (var i = 0; i < this.visited.length; i++){
@@ -35,6 +31,7 @@ this.matrix = [	['0','0','1','0','0','1','0','0','0','0','0','0','0','0'],
 		}
 	}
 
+	// return a list of all adjacent, unvisited nodes
 	this.possibleMoves = function(p){
 
 		x = p[0];
@@ -62,6 +59,7 @@ this.matrix = [	['0','0','1','0','0','1','0','0','0','0','0','0','0','0'],
 		return moves;
 	}
 
+	// has this node been visited?
 	this.checkVisited = function(position){
 
 		x = position[0];
@@ -81,6 +79,8 @@ this.matrix = [	['0','0','1','0','0','1','0','0','0','0','0','0','0','0'],
 
 
 // utility functions
+
+// pretty-print an array of moves
 function showMoves(arr){
 var str = arr.length + ' moves:';
 	for (var i = 0; i < arr.length ; i++){
@@ -92,6 +92,7 @@ var str = arr.length + ' moves:';
 print(str);
 }
 
+// array copy
 function copy(arr){
 	var newArr = arr.slice(0);
 	for(var i = newArr.length; i--;)
@@ -100,6 +101,7 @@ function copy(arr){
 	return newArr;
 }
 
+// object clone XXX
 function clone(obj){
 	if(obj == null || typeof(obj) != 'object')
 		return obj;
@@ -111,6 +113,7 @@ function clone(obj){
 	return temp;
 }
 
+// check a move queue for equivalent move
 function contains(queue,position){
 
 	if (queue.length ==0)
@@ -126,7 +129,7 @@ function contains(queue,position){
 	return 0;
 }
 
-
+// construct key for hashes
 function makeKey(position){
 
 	var x = position[0];
@@ -141,6 +144,7 @@ function Search(){
 	this.predecessor = {};
 	this.debug = 0;
 	this.count = 0;
+
 
 	this.depthFirstSearch = function(matrix,position,goal){
 
@@ -221,16 +225,17 @@ function Search(){
 			// cost to get here
  			g = depth[makeKey(move)];
 
- 			// heuristic
+ 			// Manhattan heuristic
  			deltaX = Math.abs(x - goalX);
  			deltaY = Math.abs(y - goalY);
 
- 			var h =  Math.sqrt(( deltaX * deltaX )+ (deltaY * deltaY ) );
+ 			var h =  Math.sqrt(( deltaX * deltaX ) + (deltaY * deltaY ) );
 
  			var s = h + g;
  			return -s;
  		}
  		
+ 		// Naive implementation of a priority queue
  		function getBest(moves){
  			var bestScore = -1000;
  			var bestIndex = 0;
@@ -257,8 +262,8 @@ function Search(){
  		depth[makeKey(position)] = 0;
 
  		while (open.length > 0){
-
  			this.count++;
+ 			
  			var bestIndex = getBest(open);
  			var currentPosition = open[bestIndex];
 
