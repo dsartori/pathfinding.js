@@ -105,6 +105,21 @@ function clone(obj){
 	return temp;
 }
 
+function contains(queue,position){
+
+	if (queue.length ==0)
+		return 0;
+
+	for (var i = 0; i < queue.length; i++){
+		var item = queue[i];	
+		if (item[0] == position[0] && item[1] == position[1]){
+			return 1;
+		}
+
+	}
+	return 0;
+}
+
 // search functions
 function Search(){
 
@@ -162,7 +177,7 @@ function Search(){
 
  			var moves = matrix.possibleMoves(currentPosition);
  			for (i = 0; i < moves.length; i++){
- 				if (queue.indexOf(moves[i]) < 0){
+ 				if (!contains(queue,moves[i])){
 					queue.push(moves[i]);
 				}
 			}
