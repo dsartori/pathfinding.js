@@ -145,11 +145,11 @@ function Search(){
  		print (position);
 
  		while (queue.length > 0){
- 			print (queue);
  			var currentPosition = queue[0];
  			queue.shift();
 
- 			print("position = " + currentPosition);
+					if (this.debug)
+						print ("move = " + currentPosition);
 
  			if (currentPosition[0] == goal[0] && currentPosition[1] == goal[1]){
  				return this.pathFrom(goal);
@@ -162,7 +162,9 @@ function Search(){
 
  			var moves = matrix.possibleMoves(currentPosition);
  			for (i = 0; i < moves.length; i++){
-				queue.push(moves[i]);
+ 				if (queue.indexOf(moves[i]) < 0){
+					queue.push(moves[i]);
+				}
 			}
  		}
 
@@ -174,8 +176,6 @@ function Search(){
 		var moves = [];
 		var x = position[0];
 		var y = position[1];
-
-		print ("path " + x+","+y);
 		while (flag){
 			if (this.predecessor[x+","+y] ){
 				moves.unshift(this.predecessor[x+","+y] );
