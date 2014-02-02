@@ -1,26 +1,27 @@
 function Grid(){
 
+/*
 this.matrix = [['0','1','0','0','0'],
 				['0','1','0','0','0'],
 				['0','1','0','1','0'],
 				['0','0','0','1','0'],
 				['0','0','0','1','0']];
-/*
+*/
 this.matrix = [	['0','0','1','0','0','1','0','0','0','0','0','0','0','0'],
 				['0','0','1','0','0','0','0','0','1','1','1','1','1','1'],
 				['0','0','0','0','1','0','1','0','0','0','0','0','0','0'],
 				['1','1','1','0','1','0','1','0','1','1','1','1','1','0'],
 				['0','0','0','0','1','0','1','0','0','0','0','0','1','0'],
 				['0','0','0','0','1','0','1','1','1','1','0','0','1','1'],
-				['0','1','1','1','1','0','1','0','0','0','1','0','1','0'],
-				['0','0','0','0','1','1','1','0','0','0','1','0','1','0'],
-				['0','0','0','0','1','1','1','1','1','0','1','0','0','0'],	
+				['0','1','1','0','1','1','1','0','0','0','1','0','1','0'],
+				['0','0','0','0','1','0','0','0','0','0','1','0','1','0'],
+				['0','0','0','0','1','0','1','0','1','0','1','0','0','0'],	
 				['0','0','0','0','0','0','0','0','1','0','1','1','1','0'],
 				['0','0','0','0','0','0','0','0','1','0','0','0','1','0'],
 				['0','0','0','0','0','0','0','0','1','0','0','0','0','0'],
 				['0','0','0','0','0','0','0','0','1','0','0','0','0','0'],
 				['0','0','0','0','0','0','0','0','1','0','0','0','0','0']];
-*/
+
     this.xSize = this.matrix[0].length;
     this.ySize = this.matrix.length;
 
@@ -125,12 +126,21 @@ function contains(queue,position){
 	return 0;
 }
 
+
+function makeKey(position){
+
+	var x = position[0];
+	var y = position[1];
+ 	return x+","+y;
+
+}
+
 // search functions
 function Search(){
 
 	this.predecessor = {};
 	this.debug = 0;
-	this.count =0;
+	this.count = 0;
 
 	this.depthFirstSearch = function(matrix,position,goal){
 
@@ -151,9 +161,7 @@ function Search(){
 					if (this.debug)
 						print ("move = " + moves[i]);
 
-					var x = moves[i][0];
-					var y = moves[i][1];
-					this.predecessor[x+","+y] = position;
+					this.predecessor[makeKey(moves[i])] = position;
 					newMatrix = clone(matrix);
 					if (this.depthFirstSearch(newMatrix,moves[i],goal)){
 						return this.pathFrom(goal);
@@ -175,9 +183,8 @@ function Search(){
 
 					if (this.debug){
 						print ("move = " + currentPosition);
-					 	var x = currentPosition[0];
-						var y = currentPosition[1];
-						print ("predecessor = " + this.predecessor[x+","+y]);
+	
+						print ("predecessor = " + this.predecessor[makeKey(currentPosition)]);
 					}
 			
  			if (currentPosition[0] == goal[0] && currentPosition[1] == goal[1]){
@@ -201,7 +208,148 @@ function Search(){
 
 	}
 
+ 	this.aStar = function(matrix,position,goal){
+
+ 		var that = this;
+ 		function calculateScore(move,g){
+
+ 			var goalX = g[0];
+ 			var goalY = g[1];
+
+ 			var x = move[0];
+			var y = move[1];
+
+			// cost to get here
+ 			g = depth[x+","+y];
+
+ 			// heuristic
+ 			deltaX = Math.abs(x - goalX);
+ 			deltaY = Math.abs(y - goalY);
+
+ 			var h =  Math.sqrt(( deltaX * deltaX )+ (deltaY * deltaY ) );
+
+ 			var s = h + g;
+ 			return -s;
+ 		}
+ 		
+ 		function getBest(moves){
+ 			var bestScore = -1000;
+ 			var bestIndex = 0;
+
+ 			for (var i = 0;i<moves.length;i++){
+ 				var x = moves[i][0];
+ 				var y = moves[i][1];
+
+ 				if (score[x+","+y] > bestScore){
+ 					bestIndex = i;
+ 					bestScore = score[x+","+y];
+ 				}
+ 			}
+ 			return bestIndex;
+ 		}
+
+ 		// instatiate data structures
+ 		var open = [[]];
+ 		var closed = [[]];
+ 		var score = {};
+ 		var depth = {};
+
+ 		// initialize data structures
+ 		open[0]=position;
+ 		closed[0]=position;
+ 		var x = position[0];
+		var y = position[1];
+ 		depth[x+","+y] = 0;
+
+ 		while (open.length > 0){
+
+
+ 			this.count++;
+ 			var bestIndex = getBest(open);
+ 			var currentPosition = open[bestIndex];
+
+ 			open.splice(bestIndex);
+
+ 			if (!contains(closed,currentPosition)){
+ 				closed.push(currentPosition);
+
+ 			}
+			var x = currentPosition[0];
+			var y = currentPosition[1];
+			var currentScore = calculateScore(currentPosition,goal);
+
+			if(score[x+","+y]){
+				if(currentScore < score[x+","+y]){
+					score[x+","+y] = currentScore;
+				}
+			}else{
+				score[x+","+y] = currentScore;
+			}
+			
+ 			if (currentPosition[0] == goal[0] && currentPosition[1] == goal[1]){
+ 				return this.pathFrom(goal);
+ 			}
+
+ 			//matrix.visit(currentPosition);
+
+ 	
+ 			if (this.debug){
+ 				print ("");
+ 				matrix.show();
+ 			}
+ 			var moves = matrix.possibleMoves(currentPosition);
+
+
+ 			for (var i = 0; i < moves.length; i++){
+
+ 					this.count++;
+					var x = currentPosition[0];
+					var y = currentPosition[1];
+ 					var d = depth[x+","+y];	
+
+ 					x = moves[i][0];
+ 					y = moves[i][1];
+ 					depth[x+","+y] = d+1;
+
+ 				if(contains(closed,moves[i])){
+ 					var x = moves[i][0];
+ 					var y = moves[i][1];
+ 					var prior = score[x+","+y];
+					var currentScore = calculateScore(moves[i],goal);
+ 					if  (currentScore > prior){
+ 						score[x+","+y] = currentScore;
+ 						closed.splice(closed.indexOf(moves[i]));
+ 						if (!contains(open,moves[i])){
+ 							var x = moves[i][0];
+							var y = moves[i][1];
+							this.predecessor[x+","+y] = currentPosition;
+							open.push(moves[i]);
+						};
+ 					}
+ 				}else{
+
+ 					if (!contains(open,moves[i])){
+ 						var x = moves[i][0];
+						var y = moves[i][1];
+						this.predecessor[x+","+y] = currentPosition;
+						score[x+","+y] = calculateScore(moves[i],goal);
+
+						open.push(moves[i]);
+					}
+				}
+
+				//showMoves(open);
+
+			}
+ 		}
+
+
+
+ 		return([]);
+	}
+
 	this.pathFrom = function(position){
+
 
 		flag = 1;
 		var moves = [];
@@ -225,26 +373,31 @@ function Search(){
 	}
 }
 
-
-
 // Demo 
+
+
 var s = new Search();
-s.debug = 0;
-
-
+s.debug = 1;
 var g = new Grid();
 g.show();
-
-
 print ("Depth-First Search: ");
-showMoves (s.depthFirstSearch(g,[0,0],[4,4]));
+showMoves (s.depthFirstSearch(g,[6,7],[13,13]));
 print (s.count + " steps");
 
 
-s.count = 0;
-s.predecessor = {};
-g.clearVisited();
+s = new Search();
+s.debug = 0;
+g = new Grid();
+g.show();
 print ("Breadth-First Search: ");
-showMoves (s.breadthFirstSearch(g,[0,0],[4,4]));
+showMoves (s.breadthFirstSearch(g,[6,7],[13,13]));
 print (s.count + " steps");
 
+
+s = new Search();
+s.debug = 0;
+g = new Grid();
+g.show();
+print ("A* Search: ");
+showMoves (s.aStar(g,[6,7],[13,13]));
+print (s.count + " steps");
