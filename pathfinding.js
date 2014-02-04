@@ -297,15 +297,8 @@ function Search(){
             }
             var currentScore = calculateScore(currentPosition,goal);
 
-            // If this node has been scored, check if new score is better
-            if(score[makeKey(currentPosition)]){
-                if(currentScore > score[makeKey(currentPosition)]){
-                    score[makeKey(currentPosition)] = currentScore;
-                }
-            }else{
             // Record score
-                score[makeKey(currentPosition)] = currentScore;
-            }
+            score[makeKey(currentPosition)] = currentScore;
             
             // Goal reached
             if (currentPosition[0] == goal[0] && currentPosition[1] == goal[1]){
