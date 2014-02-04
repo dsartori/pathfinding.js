@@ -259,7 +259,7 @@ function Search(){
             // cost to get here
             g = depth[makeKey(move)];
 
-            // Manhattan heuristic
+            // Euclidian distance heuristic
             deltaX = Math.abs(x - goalX);
             deltaY = Math.abs(y - goalY);
 
