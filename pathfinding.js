@@ -1,8 +1,10 @@
 
 function Grid(){
 
-
-this.matrix = [ ['0','0','1','0','0','1','0','0','0','0','0','0','0','0'],
+ 
+   if (arguments[0])
+       this.matrix = arguments[0];
+   else this.matrix = [ ['0','0','1','0','0','1','0','0','0','0','0','0','0','0'],
                 ['0','0','1','0','0','0','0','0','1','1','1','1','1','1'],
                 ['0','0','0','0','1','0','1','0','0','0','0','0','0','0'],
                 ['1','1','1','0','1','0','1','0','1','1','1','1','1','0'],
@@ -25,10 +27,28 @@ this.matrix = [ ['0','0','1','0','0','1','0','0','0','0','0','0','0','0'],
 
 
     // print the matrix
-    Grid.prototype.show = function(){
+    Grid.prototype.show = function(location,goal){
 
-        for (var i = 0; i < this.visited.length; i++){
-            print('[' + this.visited[i] + ']');
+        tempGrid = copy(this.visited);
+
+        for (var i = 0; i < tempGrid.length; i++){
+            for (var j = 0; j < tempGrid[0].length; j++){
+                if (tempGrid[i][j] == "0")
+                    tempGrid[i][j] = " ";
+
+                if (tempGrid[i][j] == "1")
+                    tempGrid[i][j] = "X";
+            }
+        }
+
+        tempGrid[location[1]][location[0]] = "@";
+        tempGrid[goal[1]][goal[0]] = "!";
+        for (var i = 0; i < tempGrid.length; i++){
+            tmpStr = "";
+            for (var j = 0; j < tempGrid.length; j++){
+                tmpStr += tempGrid[i][j];
+            }
+            print('[' + tmpStr + ']');
         }
     }
 
@@ -163,7 +183,7 @@ function Search(){
         var moves = matrix.possibleMoves(position);
 
         if (this.debug)
-            matrix.show();
+            matrix.show(position,goal);
 
         for (var i = 0; i < moves.length ; i++){
 
@@ -207,7 +227,7 @@ function Search(){
             matrix.visit(currentPosition);
 
             if (this.debug)
-                matrix.show();
+                matrix.show(currentPosition,goal);
 
             // Get all possible moves from current node 
             var moves = matrix.possibleMoves(currentPosition);
@@ -307,7 +327,7 @@ function Search(){
     
             if (this.debug){
                 print ("");
-                matrix.show();
+                matrix.show(currentPosition,goal);
             }
 
             // Get all possible moves for current node
@@ -380,11 +400,42 @@ function Search(){
 
 // Demo 
 
+var myGrid = [['0','0','0','0','0'],
+                       ['0','0','1','0','1'],
+                       ['1','0','1','0','1'],
+                       ['0','0','1','0','0'],
+                       ['0','0','1','0','0']];
+var s = new Search();
+s.debug = 0;
+var g = new Grid(myGrid);
+g.show([0,0],[4,4]);
+print ("Depth-First Search: [0,0],[4,4]");
+showMoves (s.depthFirstSearch(g,[0,0],[4,4]));
+print (s.count + " steps");
+
+
+s = new Search();
+s.debug = 0;
+g = new Grid(myGrid);
+//g.show();
+print ("Breadth-First Search: [0,0],[4,4]");
+showMoves (s.breadthFirstSearch(g,[0,0],[4,4]));
+print (s.count + " steps");
+
+
+s = new Search();
+s.debug = 0;
+g = new Grid(myGrid);
+//g.show();
+print ("A* Search: [0,0],[4,4]");
+showMoves (s.aStar(g,[0,0],[4,4]));
+print (s.count + " steps");
+
 
 var s = new Search();
 s.debug = 0;
 var g = new Grid();
-g.show();
+g.show([6,7],[13,13]);
 print ("Depth-First Search: [6,7],[13,13]");
 showMoves (s.depthFirstSearch(g,[6,7],[13,13]));
 print (s.count + " steps");
