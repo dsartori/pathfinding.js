@@ -318,11 +318,8 @@ function Search(){
                     this.count++;
                     var d = depth[makeKey(currentPosition)];    
 
-                    x = moves[i][0];
-                    y = moves[i][1];
-
                     // Increment length of path 
-                    depth[x+","+y] = d+1;
+                    depth[makeKey(moves[i])] = d+1;
 
                 // Re-evaluate closed nodes if the new estimated value is better
                 if(contains(closed,moves[i])){
