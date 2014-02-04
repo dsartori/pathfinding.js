@@ -1,13 +1,3 @@
-// use Grid.prototype.show = function(){ }
-
-/*
-print = function(){
-    if (print !=null){
-        return print;
-    }else{
-        return console.log;
-    }
-*/
 
 function Grid(){
 
