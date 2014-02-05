@@ -5,19 +5,19 @@ function Grid(){
    if (arguments[0])
        this.matrix = arguments[0];
    else this.matrix = [ ['0','0','1','0','0','1','0','0','0','0','0','0','0','0'],
-                ['0','0','1','0','0','0','0','0','1','1','1','1','1','1'],
-                ['0','0','0','0','1','0','1','0','0','0','0','0','0','0'],
-                ['1','1','1','0','1','0','1','0','1','1','1','1','1','0'],
-                ['0','0','0','0','1','0','1','0','0','0','0','0','1','0'],
-                ['0','0','0','0','1','0','1','1','1','1','0','0','1','1'],
-                ['0','1','1','0','1','1','1','0','0','0','1','0','1','0'],
-                ['0','0','0','0','1','0','0','0','0','0','1','0','1','0'],
-                ['0','0','0','0','1','0','1','0','1','0','1','0','0','0'],  
-                ['0','0','0','0','0','0','0','0','1','0','1','1','1','0'],
-                ['0','0','0','0','0','0','0','0','1','0','0','0','1','0'],
-                ['0','0','0','0','0','0','0','0','1','0','0','0','0','0'],
-                ['0','0','0','0','0','0','0','0','1','0','0','0','0','0'],
-                ['0','0','0','0','0','0','0','0','1','0','0','0','0','0']];
+                        ['0','0','1','0','0','0','0','0','1','1','1','1','1','1'],
+                        ['0','0','0','0','1','0','1','0','0','0','0','0','0','0'],
+                        ['1','1','1','0','1','0','1','0','1','1','1','1','1','0'],
+                        ['0','0','0','0','1','0','1','0','0','0','0','0','1','0'],
+                        ['0','0','0','0','1','0','1','1','1','1','0','0','1','1'],
+                        ['0','1','1','0','1','1','1','0','0','0','1','0','1','0'],
+                        ['0','0','0','0','1','0','0','0','0','0','1','0','1','0'],
+                        ['0','0','0','0','1','0','1','0','1','0','1','0','0','0'],  
+                        ['0','0','0','0','0','0','0','0','1','0','1','1','1','0'],
+                        ['0','0','0','0','0','0','0','0','1','0','0','0','1','0'],
+                        ['0','0','0','0','0','0','0','0','1','0','0','0','0','0'],
+                        ['0','0','0','0','0','0','0','0','1','0','0','0','0','0'],
+                        ['0','0','0','0','0','0','0','0','1','0','0','0','0','0']];
 
     this.xSize = this.matrix[0].length;
     this.ySize = this.matrix.length;
@@ -58,14 +58,15 @@ function Grid(){
         x = p[0];
         y = p[1];
         var moves = [];
+
         for (var i=-1; i < 2; i++){
             for (var j=-1; j < 2; j++){
-                
+
                 xAdj = x+j;
                 yAdj = y+i;
 
                 if ((i !=0 || j!=0) 
-                    && ((xAdj > -1 && xAdj < this.xSize))
+                    && ((xAdj < this.xSize && xAdj > -1))
                     && ((yAdj < this.ySize && yAdj > -1))){ 
 
                     if (this.visited[yAdj][xAdj] == 0){
@@ -122,7 +123,7 @@ function copy(arr){
     return newArr;
 }
 
-// object clone XXX
+// object clone 
 function clone(obj){
     if(obj == null || typeof(obj) != 'object')
         return obj;
@@ -136,8 +137,7 @@ function clone(obj){
 
 // check a move queue for equivalent move
 function contains(queue,position){
-
-    if (queue.length ==0)
+    if (queue.length == 0)
         return 0;
 
     for (var i = 0; i < queue.length; i++){
@@ -166,11 +166,9 @@ function Search(){
     this.debug = 0;
     this.count = 0;
 
-
     Search.prototype.depthFirstSearch = function(matrix,position,goal){
 
         this.count++;
-
         // Mark the current node as visited
         matrix.visit(position);
 
@@ -215,11 +213,6 @@ function Search(){
             var currentPosition = queue[0];
             queue.shift();
 
-                    if (this.debug){
-                        print ("move = " + currentPosition);
-    
-                        print ("predecessor = " + this.predecessor[makeKey(currentPosition)]);
-                    }
             // Check if goal is reached
             if (currentPosition[0] == goal[0] && currentPosition[1] == goal[1]){
                 return this.pathFrom(goal);
@@ -231,7 +224,7 @@ function Search(){
 
             // Get all possible moves from current node 
             var moves = matrix.possibleMoves(currentPosition);
-            for (i = 0; i < moves.length; i++){
+            for (var i = 0; i < moves.length; i++){
                 if (!contains(queue,moves[i])){
 
                     // Add new moves found to the front of the queue
@@ -400,11 +393,13 @@ function Search(){
 
 // Demo 
 
-var myGrid = [['0','0','0','0','0'],
-                       ['0','0','1','0','1'],
-                       ['1','0','1','0','1'],
-                       ['0','0','1','0','0'],
-                       ['0','0','1','0','0']];
+// Demo 1 - small map
+var myGrid = [  ['0','0','0','0','0'],
+                ['0','0','1','0','1'],
+                ['1','0','1','0','1'],
+                ['0','0','1','0','0'],
+                ['0','0','1','0','0']];
+
 var s = new Search();
 s.debug = 0;
 var g = new Grid(myGrid);
@@ -431,6 +426,7 @@ print ("A* Search: [0,0],[4,4]");
 showMoves (s.aStar(g,[0,0],[4,4]));
 print (s.count + " steps");
 
+// Demo 2 - Larger map
 
 var s = new Search();
 s.debug = 0;
