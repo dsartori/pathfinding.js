@@ -12,7 +12,7 @@ function Grid(){
                         ['0','0','0','0','1','1','1','1','1','1','1','0','1','0'],
                         ['0','1','1','0','1','0','0','0','0','0','1','0','1','0'],
                         ['0','0','0','0','1','0','0','0','0','0','1','0','1','0'],
-                        ['0','0','1','1','1','1','0','0','0','0','1','0','0','0'],  
+                        ['0','0','1','1','1','1','0','0','0','0','1','0','1','0'],  
                         ['0','0','1','1','0','1','0','0','0','0','1','0','1','0'],
                         ['0','0','1','1','0','1','0','0','0','0','1','0','1','0'],
                         ['0','0','1','1','0','1','1','0','0','1','1','0','1','0'],
@@ -43,10 +43,6 @@ function Grid(){
             }
         }
 
-        // plot location and goal
-        tempGrid[location[1]][location[0]] = "@";
-        tempGrid[goal[1]][goal[0]] = "!";
-
         //plot moves (if any)
         if (moves){
             for (var i = 0; i < moves.length; i++){
@@ -55,6 +51,11 @@ function Grid(){
                 tempGrid[move[1]][move[0]] = "."
             }
         }
+
+        // plot start and goal
+        tempGrid[location[1]][location[0]] = "@";
+        tempGrid[goal[1]][goal[0]] = "!";
+
 
         for (var i = 0; i < tempGrid.length; i++){
             tmpStr = "";
@@ -208,7 +209,7 @@ function Search(){
 
         this.count++;
         // Mark the current node as visited
-        matrix.visit(position);
+        //matrix.visit(position);
 
         // Check if goal reached
         if (position[0] == goal[0] && position[1] == goal[1]){
@@ -228,6 +229,9 @@ function Search(){
                     matrix.predecessor[makeKey(move)] = position;
                     // Clone grid and recursively call DFS
                     newMatrix = clone(matrix);
+
+                    // don't revisit this node during this iteration
+                    newMatrix.visit(position);
                     if (this.depthFirstSearch(newMatrix,move,goal)){
                         return newMatrix.pathFrom(goal);
                     }
@@ -387,8 +391,6 @@ function Search(){
             }
         }
 
-
-
         return([]);
     }
 
@@ -407,13 +409,11 @@ var myGrid = [  ['0','0','0','0','0'],
 var s = new Search();
 var g = new Grid(myGrid);
 
-
 var moves = s.depthFirstSearch(g,[0,0],[4,4]);
 g.show([0,0],[4,4],moves);
 print ("Depth-First Search: [0,0],[4,4]");
 showMoves (moves);
 print (s.count + " steps");
-
 
 s = new Search();
 g = new Grid(myGrid);
@@ -422,7 +422,6 @@ g.show([0,0],[4,4],moves);
 print ("Breadth-First Search: [0,0],[4,4]");
 showMoves (moves);
 print (s.count + " steps");
-
 
 s = new Search();
 s.debug = 0;
@@ -434,7 +433,6 @@ showMoves (moves);
 print (s.count + " steps");
 
 // Demo 2 - Larger map
-
 var s = new Search();
 s.debug = 0;
 var g = new Grid();
@@ -444,7 +442,6 @@ print ("Depth-First Search: [6,7],[13,13]");
 showMoves (moves);
 print (s.count + " steps");
 
-
 s = new Search();
 s.debug = 0;
 g = new Grid();
@@ -453,7 +450,6 @@ g.show([6,7],[13,13],moves);
 print ("Breadth-First Search: [6,7],[13,13]");
 showMoves (moves);
 print (s.count + " steps");
-
 
 s = new Search();
 s.debug = 0;
