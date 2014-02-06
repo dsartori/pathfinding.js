@@ -9,15 +9,15 @@ function Grid(){
                         ['0','0','0','0','1','0','1','0','0','0','0','0','0','0'],
                         ['1','1','1','0','1','0','1','0','1','1','1','1','1','0'],
                         ['0','0','0','0','1','0','1','0','0','0','0','0','1','0'],
-                        ['0','0','0','0','1','0','1','1','1','1','1','0','1','0'],
-                        ['0','1','1','0','1','0','1','0','0','0','1','0','1','0'],
+                        ['0','0','0','0','1','1','1','1','1','1','1','0','1','0'],
+                        ['0','1','1','0','1','0','0','0','0','0','1','0','1','0'],
                         ['0','0','0','0','1','0','0','0','0','0','1','0','1','0'],
-                        ['0','0','0','0','1','1','1','0','0','0','1','0','0','0'],  
-                        ['0','0','0','0','0','1','1','0','0','0','1','0','1','0'],
-                        ['0','0','0','0','0','1','1','0','1','0','1','0','1','0'],
-                        ['0','0','0','0','0','1','1','0','1','0','1','0','0','0'],
-                        ['0','0','0','0','0','0','0','0','0','0','0','0','0','0'],
-                        ['0','0','0','0','0','0','0','0','1','1','1','0','0','0']];
+                        ['0','0','1','1','1','1','0','0','0','0','1','0','0','0'],  
+                        ['0','0','1','1','0','1','0','0','0','0','1','0','1','0'],
+                        ['0','0','1','1','0','1','0','0','0','0','1','0','1','0'],
+                        ['0','0','1','1','0','1','1','0','0','1','1','0','1','0'],
+                        ['0','0','1','1','0','0','0','0','0','0','0','0','1','0'],
+                        ['0','0','0','0','0','0','0','0','1','1','1','0','1','0']];
 
     this.xSize = this.matrix[0].length;
     this.ySize = this.matrix.length;
@@ -25,6 +25,7 @@ function Grid(){
     // visited matrix marks visited nodes
     this.visited = copy(this.matrix);
 
+    this.predecessor = {};
 
     // print the matrix
     // optionally, include a list of moves to plot
@@ -109,6 +110,31 @@ function Grid(){
     Grid.prototype.visit = function(position){
         this.visited[position[1]][position[0]] = '2';
     }
+
+        // Walk back along breadcrumb path from goal node 
+    Grid.prototype.pathFrom = function(position){
+
+
+        flag = 1;
+        var moves = [];
+        var x = position[0];
+        var y = position[1];
+        while (flag){
+            if (this.predecessor[x+","+y] ){
+                moves.unshift(this.predecessor[x+","+y] );
+                var newX = this.predecessor[x+","+y][0];
+                var newY = this.predecessor[x+","+y][1];
+
+                x = newX;
+                y = newY;
+            }else{
+                flag = 0;
+            }
+
+        }
+
+        return moves;
+    }
 }
 
 
@@ -174,7 +200,7 @@ function makeKey(position){
 // search functions
 function Search(){
 
-    this.predecessor = {};
+    //this.predecessor = {};
     this.debug = 0;
     this.count = 0;
 
@@ -186,7 +212,7 @@ function Search(){
 
         // Check if goal reached
         if (position[0] == goal[0] && position[1] == goal[1]){
-            return this.pathFrom(goal);
+            return matrix.pathFrom(goal);
         }
 
         // Get all possible moves from current node
@@ -197,16 +223,13 @@ function Search(){
 
         for (var i = 0; i < moves.length ; i++){
 
-                    if (this.debug)
-                        print ("move = " + moves[i]);
-
+                    var move = moves[i];
                     // Record breadcrumb path
-                    this.predecessor[makeKey(moves[i])] = position;
-
+                    matrix.predecessor[makeKey(move)] = position;
                     // Clone grid and recursively call DFS
                     newMatrix = clone(matrix);
-                    if (this.depthFirstSearch(newMatrix,moves[i],goal)){
-                        return this.pathFrom(goal);
+                    if (this.depthFirstSearch(newMatrix,move,goal)){
+                        return newMatrix.pathFrom(goal);
                     }
 
         }
@@ -227,7 +250,7 @@ function Search(){
 
             // Check if goal is reached
             if (currentPosition[0] == goal[0] && currentPosition[1] == goal[1]){
-                return this.pathFrom(goal);
+                return matrix.pathFrom(goal);
             }
             matrix.visit(currentPosition);
 
@@ -240,7 +263,7 @@ function Search(){
                 if (!contains(queue,moves[i])){
 
                     // Add new moves found to the front of the queue
-                    this.predecessor[makeKey(moves[i])] = currentPosition;
+                    matrix.predecessor[makeKey(moves[i])] = currentPosition;
                     queue.push(moves[i]);
                 }
             }
@@ -267,27 +290,29 @@ function Search(){
             // Manhattan distance 
             deltaX = Math.abs(x - goalX);
             deltaY = Math.abs(y - goalY);
-            // Manhattan 
-            var h = deltaY + deltaX; 
-            // Combine known cost with estimate 
+            
 
+            var h = deltaY + deltaX; 
+            // Combine known cost with estimate
 
             var score = h + g;
             return score;
         }
-        
+        var that = this;
         // Naive implementation of a priority queue
         function getBest(moves){
             var bestScore = 9999;
             var bestIndex = 0;
 
             for (var i = 0;i<moves.length;i++){
+
                 if (score[makeKey(moves[i])] < bestScore){
                     bestIndex = i;
                     bestScore = score[makeKey(moves[i])];
                 }
             }
            
+            //print (that.predecessor[makeKey(moves[bestIndex])], moves[bestIndex]);
             return bestIndex;
         }
 
@@ -314,16 +339,16 @@ function Search(){
             var currentPosition = open[bestIndex];
             // Goal reached
             if (currentPosition[0] == goal[0] && currentPosition[1] == goal[1]){
-                return this.pathFrom(goal);
+                return matrix.pathFrom(goal);
             }
     
             // Remove selected item from priority queue
-            open.splice(bestIndex);
+            open.splice(bestIndex,1);
             // Add to closed nodes
             closed.push(currentPosition);
 
-            var currentScore = calculateScore(currentPosition,goal);
             // Record score
+            var currentScore = calculateScore(currentPosition,goal);
             score[makeKey(currentPosition)] = currentScore;
             
             if (this.debug){
@@ -336,25 +361,25 @@ function Search(){
             var d = depth[makeKey(currentPosition)];
             for (var i = 0; i < moves.length; i++){
     
+                // Increment length of path 
                 var currDepth = d+1;
                 move = moves[i];
                 // closed nodes are ignored
                 if(!contains(closed,move)){
-
-                    // Increment length of path 
-                    depth[makeKey(move)] = currDepth;
-                    // Re-evaluate open nodes if the new estimated value is better
+                    // Update open nodes if the new estimated value is better
                     if(contains(open,move)){
                         var prior = score[makeKey(move)];
                         var currentScore = calculateScore(move,goal);
                         if  (currentScore < prior){
+                            depth[makeKey(move)] = currDepth;
                             score[makeKey(move)] = currentScore;
-                            this.predecessor[makeKey(move)] = currentPosition;
+                            matrix.predecessor[makeKey(move)] = currentPosition;
                         }
                     }else{
                     // Add previously unevaluated node to queue
+                        depth[makeKey(move)] = currDepth;
                         score[makeKey(move)] = calculateScore(move,goal);
-                        this.predecessor[makeKey(move)] = currentPosition; 
+                        matrix.predecessor[makeKey(move)] = currentPosition; 
                         open.push(move);
                     }
                 }
@@ -367,30 +392,7 @@ function Search(){
         return([]);
     }
 
-    // Walk back along breadcrumb path from goal node 
-    Search.prototype.pathFrom = function(position){
 
-
-        flag = 1;
-        var moves = [];
-        var x = position[0];
-        var y = position[1];
-        while (flag){
-            if (this.predecessor[x+","+y] ){
-                moves.unshift(this.predecessor[x+","+y] );
-                var newX = this.predecessor[x+","+y][0];
-                var newY = this.predecessor[x+","+y][1];
-
-                x = newX;
-                y = newY;
-            }else{
-                flag = 0;
-            }
-
-        }
-
-        return moves;
-    }
 }
 
 // Demo 
@@ -404,6 +406,7 @@ var myGrid = [  ['0','0','0','0','0'],
 
 var s = new Search();
 var g = new Grid(myGrid);
+
 
 var moves = s.depthFirstSearch(g,[0,0],[4,4]);
 g.show([0,0],[4,4],moves);
@@ -425,7 +428,7 @@ s = new Search();
 s.debug = 0;
 g = new Grid(myGrid);
 moves = s.aStar(g,[0,0],[4,4]);
-g.show([0,0],[4,4]),moves;
+g.show([0,0],[4,4],moves);
 print ("A* Search: [0,0],[4,4]");
 showMoves (moves);
 print (s.count + " steps");
