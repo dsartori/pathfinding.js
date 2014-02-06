@@ -9,15 +9,15 @@ function Grid(){
                         ['0','0','0','0','1','0','1','0','0','0','0','0','0','0'],
                         ['1','1','1','0','1','0','1','0','1','1','1','1','1','0'],
                         ['0','0','0','0','1','0','1','0','0','0','0','0','1','0'],
-                        ['0','0','0','0','1','0','1','1','1','1','0','0','1','1'],
-                        ['0','1','1','0','1','1','1','0','0','0','1','0','1','0'],
+                        ['0','0','0','0','1','0','1','1','1','1','1','0','1','0'],
+                        ['0','1','1','0','1','0','1','0','0','0','1','0','1','0'],
                         ['0','0','0','0','1','0','0','0','0','0','1','0','1','0'],
-                        ['0','0','0','0','1','0','1','0','1','0','1','0','0','0'],  
-                        ['0','0','0','0','0','0','0','0','1','0','1','1','1','0'],
-                        ['0','0','0','0','0','0','0','0','1','0','0','0','1','0'],
-                        ['0','0','0','0','0','0','0','0','1','0','0','0','0','0'],
-                        ['0','0','0','0','0','0','0','0','1','0','0','0','0','0'],
-                        ['0','0','0','0','0','0','0','0','1','0','0','0','0','0']];
+                        ['0','0','0','0','1','1','1','0','0','0','1','0','0','0'],  
+                        ['0','0','0','0','0','1','1','0','0','0','1','0','1','0'],
+                        ['0','0','0','0','0','1','1','0','1','0','1','0','1','0'],
+                        ['0','0','0','0','0','1','1','0','1','0','1','0','0','0'],
+                        ['0','0','0','0','0','0','0','0','0','0','0','0','0','0'],
+                        ['0','0','0','0','0','0','0','0','1','1','1','0','0','0']];
 
     this.xSize = this.matrix[0].length;
     this.ySize = this.matrix.length;
@@ -27,9 +27,10 @@ function Grid(){
 
 
     // print the matrix
-    Grid.prototype.show = function(location,goal){
+    // optionally, include a list of moves to plot
+    Grid.prototype.show = function(location,goal,moves){
 
-        tempGrid = copy(this.visited);
+        tempGrid = copy(this.matrix);
 
         for (var i = 0; i < tempGrid.length; i++){
             for (var j = 0; j < tempGrid[0].length; j++){
@@ -41,8 +42,19 @@ function Grid(){
             }
         }
 
+        // plot location and goal
         tempGrid[location[1]][location[0]] = "@";
         tempGrid[goal[1]][goal[0]] = "!";
+
+        //plot moves (if any)
+        if (moves){
+            for (var i = 0; i < moves.length; i++){
+                var move = moves[i];
+
+                tempGrid[move[1]][move[0]] = "."
+            }
+        }
+
         for (var i = 0; i < tempGrid.length; i++){
             tmpStr = "";
             for (var j = 0; j < tempGrid.length; j++){
@@ -239,42 +251,43 @@ function Search(){
     Search.prototype.aStar = function(matrix,position,goal){
 
         // Function to calculate a node's score
-        function calculateScore(move,g){
+        function calculateScore(move,goal){
 
             // Goal location 
-            var goalX = g[0];
-            var goalY = g[1];
+            var goalX = goal[0];
+            var goalY = goal[1];
 
             // Current location
             var x = move[0];
             var y = move[1];
 
             // cost to get here
-            g = depth[makeKey(move)];
+            var g = depth[makeKey(move)];
 
-            // Euclidian distance heuristic
+            // Manhattan distance 
             deltaX = Math.abs(x - goalX);
             deltaY = Math.abs(y - goalY);
-
-            var h =  Math.sqrt(( deltaX * deltaX ) + (deltaY * deltaY ) );
-
+            // Manhattan 
+            var h = deltaY + deltaX; 
             // Combine known cost with estimate 
+
+
             var score = h + g;
-            return -score;
+            return score;
         }
         
         // Naive implementation of a priority queue
         function getBest(moves){
-            var bestScore = -1000;
+            var bestScore = 9999;
             var bestIndex = 0;
 
             for (var i = 0;i<moves.length;i++){
-
-                if (score[makeKey(moves[i])] > bestScore){
+                if (score[makeKey(moves[i])] < bestScore){
                     bestIndex = i;
                     bestScore = score[makeKey(moves[i])];
                 }
             }
+           
             return bestIndex;
         }
 
@@ -288,36 +301,31 @@ function Search(){
 
         // Open holds nodes to be evaluated
         open[0]=position;
-
+        //score[makeKey(position)] = calculateScore(position,goal);
         // Closed holds nodes that have been evaluated
         closed[0]=position;
         depth[makeKey(position)] = 0;
 
         while (open.length > 0){
-            this.count++;
 
+            this.count++;
             // Get first item in priority queue
             var bestIndex = getBest(open);
             var currentPosition = open[bestIndex];
-
-            // Remove selected item from priority queue
-            open.splice(bestIndex);
-
-            // Add to evaluated nodes
-            if (!contains(closed,currentPosition)){
-                closed.push(currentPosition);
-
-            }
-            var currentScore = calculateScore(currentPosition,goal);
-
-            // Record score
-            score[makeKey(currentPosition)] = currentScore;
-            
             // Goal reached
             if (currentPosition[0] == goal[0] && currentPosition[1] == goal[1]){
                 return this.pathFrom(goal);
             }
     
+            // Remove selected item from priority queue
+            open.splice(bestIndex);
+            // Add to closed nodes
+            closed.push(currentPosition);
+
+            var currentScore = calculateScore(currentPosition,goal);
+            // Record score
+            score[makeKey(currentPosition)] = currentScore;
+            
             if (this.debug){
                 print ("");
                 matrix.show(currentPosition,goal);
@@ -325,35 +333,29 @@ function Search(){
 
             // Get all possible moves for current node
             var moves = matrix.possibleMoves(currentPosition);
-
+            var d = depth[makeKey(currentPosition)];
             for (var i = 0; i < moves.length; i++){
-
-                    this.count++;
-                    var d = depth[makeKey(currentPosition)];    
+    
+                var currDepth = d+1;
+                move = moves[i];
+                // closed nodes are ignored
+                if(!contains(closed,move)){
 
                     // Increment length of path 
-                    depth[makeKey(moves[i])] = d+1;
-
-                // Re-evaluate closed nodes if the new estimated value is better
-                if(contains(closed,moves[i])){
-                    var prior = score[makeKey(moves[i])];
-                    var currentScore = calculateScore(moves[i],goal);
-                    if  (currentScore > prior){
-                        score[makeKey(moves[i])] = currentScore;
-                        closed.splice(closed.indexOf(moves[i]));
-                        if (!contains(open,moves[i])){
-                            this.predecessor[makeKey(moves[i])] = currentPosition;
-                            open.push(moves[i]);
-                        };
-                    }
-                }else{
-
+                    depth[makeKey(move)] = currDepth;
+                    // Re-evaluate open nodes if the new estimated value is better
+                    if(contains(open,move)){
+                        var prior = score[makeKey(move)];
+                        var currentScore = calculateScore(move,goal);
+                        if  (currentScore < prior){
+                            score[makeKey(move)] = currentScore;
+                            this.predecessor[makeKey(move)] = currentPosition;
+                        }
+                    }else{
                     // Add previously unevaluated node to queue
-                    if (!contains(open,moves[i])){
-                        this.predecessor[makeKey(moves[i])] = currentPosition;
-                        score[makeKey(moves[i])] = calculateScore(moves[i],goal);
-
-                        open.push(moves[i]);
+                        score[makeKey(move)] = calculateScore(move,goal);
+                        this.predecessor[makeKey(move)] = currentPosition; 
+                        open.push(move);
                     }
                 }
 
@@ -401,29 +403,31 @@ var myGrid = [  ['0','0','0','0','0'],
                 ['0','0','1','0','0']];
 
 var s = new Search();
-s.debug = 0;
 var g = new Grid(myGrid);
-g.show([0,0],[4,4]);
+
+var moves = s.depthFirstSearch(g,[0,0],[4,4]);
+g.show([0,0],[4,4],moves);
 print ("Depth-First Search: [0,0],[4,4]");
-showMoves (s.depthFirstSearch(g,[0,0],[4,4]));
+showMoves (moves);
 print (s.count + " steps");
 
 
 s = new Search();
-s.debug = 0;
 g = new Grid(myGrid);
-//g.show();
+moves = s.breadthFirstSearch(g,[0,0],[4,4]);
+g.show([0,0],[4,4],moves);
 print ("Breadth-First Search: [0,0],[4,4]");
-showMoves (s.breadthFirstSearch(g,[0,0],[4,4]));
+showMoves (moves);
 print (s.count + " steps");
 
 
 s = new Search();
 s.debug = 0;
 g = new Grid(myGrid);
-//g.show();
+moves = s.aStar(g,[0,0],[4,4]);
+g.show([0,0],[4,4]),moves;
 print ("A* Search: [0,0],[4,4]");
-showMoves (s.aStar(g,[0,0],[4,4]));
+showMoves (moves);
 print (s.count + " steps");
 
 // Demo 2 - Larger map
@@ -431,25 +435,28 @@ print (s.count + " steps");
 var s = new Search();
 s.debug = 0;
 var g = new Grid();
-g.show([6,7],[13,13]);
+moves = s.depthFirstSearch(g,[6,7],[13,13]);
+g.show([6,7],[13,13],moves);
 print ("Depth-First Search: [6,7],[13,13]");
-showMoves (s.depthFirstSearch(g,[6,7],[13,13]));
+showMoves (moves);
 print (s.count + " steps");
 
 
 s = new Search();
 s.debug = 0;
 g = new Grid();
-//g.show();
+moves = s.breadthFirstSearch(g,[6,7],[13,13]);
+g.show([6,7],[13,13],moves);
 print ("Breadth-First Search: [6,7],[13,13]");
-showMoves (s.breadthFirstSearch(g,[6,7],[13,13]));
+showMoves (moves);
 print (s.count + " steps");
 
 
 s = new Search();
 s.debug = 0;
 g = new Grid();
-//g.show();
+moves = s.aStar(g,[6,7],[13,13]);
+g.show([6,7],[13,13],moves);
 print ("A* Search: [6,7],[13,13]");
-showMoves (s.aStar(g,[6,7],[13,13]));
+showMoves (moves);
 print (s.count + " steps");
