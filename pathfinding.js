@@ -1,22 +1,20 @@
 
-module.exports = {
-
-     Grid: function(){
+Grid = function(){
        if (arguments[0])
            this.matrix = arguments[0];
        else this.matrix = [ ['0','0','1','0','0','1','0','0','0','0','0','0','0','0'],
                             ['0','0','1','0','0','0','0','0','1','1','1','1','1','1'],
                             ['0','0','0','0','1','0','1','0','0','0','0','0','0','0'],
-                            ['1','1','1','0','1','0','1','0','1','1','1','1','1','0'],
-                            ['0','0','0','0','1','0','1','0','0','0','0','0','1','0'],
-                            ['0','0','0','0','1','1','1','1','1','1','1','0','1','0'],
+                            ['1','1','0','1','1','0','1','0','1','1','1','1','1','0'],
+                            ['0','1','0','0','1','0','1','0','0','0','0','0','1','0'],
+                            ['0','0','0','0','1','1','1','0','1','1','1','0','1','0'],
                             ['0','1','1','0','1','0','0','0','0','0','1','0','1','0'],
-                            ['0','0','0','0','1','0','0','0','0','0','1','0','1','0'],
-                            ['0','0','1','1','1','1','0','0','0','0','1','0','1','0'],  
-                            ['0','0','1','1','0','1','0','0','0','0','1','0','1','0'],
-                            ['0','0','1','1','0','1','0','0','0','0','1','0','1','0'],
-                            ['0','0','1','1','0','1','1','0','0','1','1','0','1','0'],
-                            ['0','0','1','1','0','0','0','0','0','0','0','0','1','0'],
+                            ['0','0','0','0','1','1','1','0','1','1','1','0','1','0'],
+                            ['1','0','1','1','1','1','0','0','0','0','1','0','1','0'],  
+                            ['1','0','1','1','0','1','0','1','1','0','1','0','1','0'],
+                            ['0','0','0','1','0','1','0','0','0','0','1','0','1','0'],
+                            ['1','1','0','1','0','1','1','0','0','1','1','0','0','0'],
+                            ['0','1','1','1','0','0','0','0','0','0','0','0','1','0'],
                             ['0','0','0','0','0','0','0','0','1','1','1','0','1','0']];
 
         this.xSize = this.matrix[0].length;
@@ -80,6 +78,7 @@ module.exports = {
                     yAdj = y+i;
 
                     if ((i !=0 || j!=0) 
+                        && (i==0 || j==0) // disable to allow diagonals
                         && ((xAdj < this.xSize && xAdj > -1))
                         && ((yAdj < this.ySize && yAdj > -1))){ 
 
@@ -95,6 +94,11 @@ module.exports = {
             return moves;
         }
 
+        this.updateMatrix = function(x,y,state){
+            this.matrix[y][x] = state;
+            this.visited[y][x] = state;
+        }
+
         // has this node been visited?
         this.checkVisited = function(position){
 
@@ -108,8 +112,9 @@ module.exports = {
             this.visited = this.matrix;
         }
 
-        this.visit = function(position){
-            this.visited[position[1]][position[0]] = '2';
+        this.visit = function(position,c){
+            c+=2
+            this.visited[position[1]][position[0]] =c;
         }
 
             // Walk back along breadcrumb path from goal node 
@@ -137,19 +142,26 @@ module.exports = {
             return moves;
         }
     }
-    ,
     // search functions
-    Search: function(){
+Search = function(){
 
-        //this.predecessor = {};
         this.debug = 0;
         this.count = 0;
+
+        this.searchedPositions = [];
+        this.searchedPositions[0] = [];     
 
         this.depthFirstSearch = function(matrix,position,goal){
 
             this.count++;
+            this.searchedPositions[this.count] = [];
+
             // Mark the current node as visited
-            //matrix.visit(position);
+            matrix.visit(position,2);
+
+
+            // logging
+            this.searchedPositions[this.count].push(position);
 
             // Check if goal reached
             if (position[0] == goal[0] && position[1] == goal[1]){
@@ -166,14 +178,11 @@ module.exports = {
 
                         var move = moves[i];
                         // Record breadcrumb path
-                        matrix.predecessor[makeKey(move)] = position;
-                        // Clone grid and recursively call DFS
-                        newMatrix = clone(matrix);
+                        matrix.predecessor[makeKey(move)] = position
 
-                        // don't revisit this node during this iteration
-                        newMatrix.visit(position);
-                        if (this.depthFirstSearch(newMatrix,move,goal)){
-                            return newMatrix.pathFrom(goal);
+                        // recursively call DFS
+                          if (this.depthFirstSearch(matrix,move,goal)){
+                            return matrix.pathFrom(goal);
                         }
 
             }
@@ -187,19 +196,22 @@ module.exports = {
 
             while (queue.length > 0){
                 this.count++;
+                this.searchedPositions[this.count] = [];
 
                 // Take first element from queue for evaluation, then remove it
                 var currentPosition = queue[0];
                 queue.shift();
 
+                matrix.visit(currentPosition,2);
+                this.searchedPositions[this.count].push(currentPosition);
+
                 // Check if goal is reached
                 if (currentPosition[0] == goal[0] && currentPosition[1] == goal[1]){
                     return matrix.pathFrom(goal);
                 }
-                matrix.visit(currentPosition);
 
                 if (this.debug)
-                    matrix.show(currentPosition,goal);
+                matrix.show(currentPosition,goal);
 
                 // Get all possible moves from current node 
                 var moves = matrix.possibleMoves(currentPosition);
@@ -243,7 +255,7 @@ module.exports = {
                 return score;
             }
 
-            // Naive implementation of a priority queue
+            // Simple priority queue
             function getBest(moves){
                 var bestScore = 9999;
                 var bestIndex = 0;
@@ -259,17 +271,15 @@ module.exports = {
                 return bestIndex;
             }
 
-            // instatiate data structures
+            // initialize data structures
             var open = [[]];
             var closed = [[]];
             var score = {};
             var depth = {};
 
-            // initialize data structures
-
             // Open holds nodes to be evaluated
             open[0]=position;
-            //score[makeKey(position)] = calculateScore(position,goal);
+            
             // Closed holds nodes that have been evaluated
             closed[0]=position;
             depth[makeKey(position)] = 0;
@@ -277,9 +287,12 @@ module.exports = {
             while (open.length > 0){
 
                 this.count++;
+                this.searchedPositions[this.count] = [];
+
                 // Get first item in priority queue
                 var bestIndex = getBest(open);
                 var currentPosition = open[bestIndex];
+                this.searchedPositions[this.count].push(currentPosition);
                 // Goal reached
                 if (currentPosition[0] == goal[0] && currentPosition[1] == goal[1]){
                     return matrix.pathFrom(goal);
@@ -334,27 +347,10 @@ module.exports = {
         }
 
 
-    },
-    Utility: function(){
-            this.showMoves = function(arr){
-        var str = arr.length + ' moves:';
-            for (var i = 0; i < arr.length ; i++){
-                if (i > 0){ 
-                    str += ',';
-                }
-                str += '{' + arr[i] + '}';
-            }
-        console.log(str);
-        }
     }
-};
-
 
 
 // utility functions
-
-// pretty-print an array of moves
-
 
 // array copy
 function copy(arr){

@@ -1,0 +1,42 @@
+<html>
+<head>
+	<script type="text/javascript" src="main.js" defer></script>
+	<script type="text/javascript" src="pathfinding.js"></script>
+	<link rel="stylesheet" href="style.css" type="text/css">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu" />
+</head>
+<body>
+
+    <h1>Pathfinding Demo</h1>
+            <div id="info" class="info"><h2>Introduction</h2>
+                <p>This is an interactive demonstration of basic AI pathfinding techniques. Set up the maze, choose an algorithm and watch how the program finds a path from its starting point to the goal position.</p>
+
+                    <h2>Controls</h2>
+                    <p>Select the search algorithm to use from the dropdown box. <img src="img/origin.png"> is the starting location of the search, <img src="img/cell.png"> represents an impassible wall and <img src="img/goal.png"> is the goal.</p>
+                    <p>Before starting the simulation, clicking on a position will toggle between open space and wall. Make sure the goal is reachable! When you're satisfied with your maze click the <img src="img/play.svg" height=32px > button to watch the search. Use the <img src="img/refresh.svg" height=32px> button to reset the simulation.
+                </p>
+                <h2>More Information</h2>
+                <p>For more information on the algorithms used here, consult the wikipedia articles:</p>
+                <ul>
+                    <li><a target="_blank"  href="https://en.wikipedia.org/wiki/Breadth-first_search">Breadth-first search</a></li>
+                    <li><a target="_blank"  href="https://en.wikipedia.org/wiki/Depth-first_search">Depth-first search</a></li>
+                    <li><a target="_blank"  href="https://en.wikipedia.org/wiki/A*_search_algorithm">A*</a></li>
+                </ul>
+
+                <p>The source code for this demonstration can be viewed on <a target="_blank" href="https://github.com/dsartori/pathfinding.js">Github</a></p>
+                <p>Click anywhere to dismiss this help screen.</p>
+                <p>Code by Doug Sartori © 2020 See license file for terms.</p>
+            </div>
+
+            <div id="controls" class="controls">
+               <select id="presets"></select>
+               <input type="image" id="play" alt="play" src="img/play.svg">
+               <input type="image" id="restart" alt="restart" src="img/refresh.svg">
+               <input type="image" id="help" alt="help" src="img/question.svg">
+           </div>
+           <div id="canvas-wrapper" class="wrapper">
+            <canvas id="board" width= 840 height=840></canvas>
+           </div>
+           <div id="steps">0 Steps</div>
+
+   </body>

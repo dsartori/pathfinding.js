@@ -1,7 +1,9 @@
 pathfinding.js
 ==============
 
-Pathfinding demo from Hackforge Tech Talk.
+Pathfinding demo built for a Hackforge Tech Talk.
 
-This script was tested on OS X Mavericks using Node.
+There is an interactive web demo at https://dsartori.github.io/pathfinding.js
+
+Use demo.js to demonstrate the algorithms from a command line with Node.js.
 
