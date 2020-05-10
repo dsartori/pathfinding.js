@@ -113,7 +113,6 @@ Grid = function(){
         }
 
         this.visit = function(position,c){
-            c+=2
             this.visited[position[1]][position[0]] =c;
         }
 
@@ -145,7 +144,7 @@ Grid = function(){
     // search functions
 Search = function(){
 
-        this.debug = 0;
+
         this.count = 0;
 
         this.searchedPositions = [];
@@ -154,6 +153,7 @@ Search = function(){
         this.depthFirstSearch = function(matrix,position,goal){
 
             this.count++;
+            // logging for visualizer
             this.searchedPositions[this.count] = [];
 
             // Mark the current node as visited
@@ -170,9 +170,6 @@ Search = function(){
 
             // Get all possible moves from current node
             var moves = matrix.possibleMoves(position);
-
-            if (this.debug)
-                matrix.show(position,goal);
 
             for (var i = 0; i < moves.length ; i++){
 
@@ -196,22 +193,22 @@ Search = function(){
 
             while (queue.length > 0){
                 this.count++;
+
                 this.searchedPositions[this.count] = [];
 
-                // Take first element from queue for evaluation, then remove it
+                // take first element from queue for evaluation, then remove it
                 var currentPosition = queue[0];
                 queue.shift();
 
                 matrix.visit(currentPosition,2);
+
+                // logging for visualizer
                 this.searchedPositions[this.count].push(currentPosition);
 
                 // Check if goal is reached
                 if (currentPosition[0] == goal[0] && currentPosition[1] == goal[1]){
                     return matrix.pathFrom(goal);
                 }
-
-                if (this.debug)
-                matrix.show(currentPosition,goal);
 
                 // Get all possible moves from current node 
                 var moves = matrix.possibleMoves(currentPosition);
@@ -287,6 +284,8 @@ Search = function(){
             while (open.length > 0){
 
                 this.count++;
+
+                // logging for visualizer
                 this.searchedPositions[this.count] = [];
 
                 // Get first item in priority queue
@@ -306,11 +305,6 @@ Search = function(){
                 // Record score
                 var currentScore = calculateScore(currentPosition,goal);
                 score[makeKey(currentPosition)] = currentScore;
-                
-                if (this.debug){
-                    console.log ("");
-                    matrix.show(currentPosition,goal);
-                }
 
                 // Get all possible moves for current node
                 var moves = matrix.possibleMoves(currentPosition);
